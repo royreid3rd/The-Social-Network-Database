@@ -1,8 +1,6 @@
 const express = require('express');
 const routes = require('./routes');
-const { connection } = require('./config/connection');
-const seedUsers = require('./seeds/users-seeds');
-const seedThoughts = require('./seeds/thoughts-seeds');
+const { connectDB } = require('./config/connection');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,10 +10,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(routes);
 
-connection.once('open', async () => {
-  await seedUsers();
-  await seedThoughts();
+connectDB().then(async () => {
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+}).catch(err => {
+  console.error('Error connecting to database:', err.message);
+  process.exit(1);
 });
